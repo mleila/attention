@@ -70,7 +70,7 @@ class Vectorizer:
         fasttext.util.reduce_model(ft, embedding_size)
 
         # select vocab
-        vocab = self.english_vocab if lang == 'english' else self.french_vocab
+        vocab = self.english_vocab if lang == ENGLISH else self.french_vocab
 
         # populate matrix
         matrix = []
