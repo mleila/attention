@@ -4,8 +4,8 @@ import os
 from distutils.core import setup
 
 BIN = 'bin'
-PACKAGE_NAME = ''
-PACKAGES = []
+PACKAGE_NAME = 'attention'
+PACKAGES = ['attention']
 VERSION = 0.01
 MAINTAINER='Mohamed Leila',
 MAINTAINER_EMAIL='mohamed.leila.1989@gmail.com',
