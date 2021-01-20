@@ -54,7 +54,7 @@ class Vectorizer:
 
         # standardize vector length
         if len(vector) < seq_size:
-            vector += [vocab.pad] * (seq_size - len(vector))
+            vector += [vocab.lookup_token(vocab.pad)] * (seq_size - len(vector))
         else:
             vector = vector[:seq_size]
 
