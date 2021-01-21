@@ -50,13 +50,15 @@ class Vectorizer:
         tokens = tokenizer(sentence)
 
         # build vector
-        vector = [vocab.lookup_token(token) for token in tokens]
+        vector = [vocab.lookup_token(vocab.sos)]
+        vector += [vocab.lookup_token(token) for token in tokens]
+        vector += [vocab.lookup_token(vocab.eos)]
 
         # standardize vector length
         if len(vector) < seq_size:
             vector += [vocab.lookup_token(vocab.pad)] * (seq_size - len(vector))
         else:
-            vector = vector[:seq_size]
+            vector = vector[:seq_size-1] + [vocab.lookup_token(vocab.eos)]
 
         return torch.tensor(vector)
 
