@@ -1,6 +1,11 @@
+import os
 import re
 import unicodedata
 
+
+def handle_dirs(dirpath):
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
 
 def unicode_to_ascii(s):
     return ''.join(
