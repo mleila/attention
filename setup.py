@@ -4,7 +4,7 @@ import os
 from distutils.core import setup
 
 BIN = 'bin'
-PACKAGE_NAME = 'attention'
+PACKAGE_NAME = 'learning_attention'
 PACKAGES = ['attention']
 VERSION = 0.01
 MAINTAINER='Mohamed Leila',
