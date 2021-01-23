@@ -31,7 +31,7 @@ class DecoderRNN(nn.Module):
         self.gru = nn.GRU(embedding_size, hidden_size, batch_first=True)
 
         self.out = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input, hidden):
         output = self.embedding(input)
@@ -58,7 +58,7 @@ class TranslationModel(nn.Module):
         self.decoder = decoder
         self.output_vocab_size = output_vocab_size
 
-    def forward(self, encoder_input, decoder_input, device='cpu'):
+    def train_forward(self, encoder_input, decoder_input, device='cpu'):
         """
         Model forward
 
@@ -86,3 +86,34 @@ class TranslationModel(nn.Module):
             decoder_outputs[index] = decoder_output
 
         return decoder_outputs.view(batch_size, seq_len, self.output_vocab_size)
+
+    def eval_forward(self, encoder_input, sos_token, device):
+
+        with torch.no_grad():
+
+            # encoder setup
+            batch_size, seq_len = encoder_input.shape
+            encoder_hidden = self.encoder.init_hidden(batch_size, device=device)
+
+            # encoder forward pass
+            encoder_output, encoder_hidden = self.encoder(encoder_input, encoder_hidden)
+            encoder_output = encoder_output.to(device)
+
+            # decoder setup
+            decoder_hidden = encoder_hidden
+            decoder_outputs = torch.zeros(batch_size, seq_len, self.output_vocab_size)
+            next_tokens = torch.tensor(sos_token).expand(batch_size)
+
+            # decoder forward pass
+            for token in range(seq_len-1):
+                decoder_output, decoder_hidden = self.decoder(next_tokens, decoder_hidden)
+                decoder_outputs[:, token] = decoder_output
+                next_tokens = torch.argmax(decoder_output, dim=1)
+
+            return decoder_outputs
+
+    def forward(self, encoder_input, decoder_input=None, sos_token=None, device='cpu'):
+        if self.training:
+            return self.train_forward(encoder_input, decoder_input, device)
+        return self.eval_forward(encoder_input, sos_token, device)
+
