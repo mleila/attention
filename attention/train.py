@@ -1,4 +1,4 @@
-from attention.constants import DECODER_INPUT, ENCODER_INPUT
+from attention.constants import DECODER_INPUT, ENCODER_INPUT, TRAIN, VALID
 import time
 import torch
 
@@ -51,11 +51,9 @@ class Translation_Trainer:
                 checkpoint_state = torch.load(latest_checkpoint, map_location=map_location)
                 load_checkpoint(checkpoint_state, self.model)
 
-        # set training mode
-        self.model.train()
 
         for epoch in range(nb_epochs):
-            losses = []
+            train_losses = []
 
             # save model training checkpoint
             if checkpoint:
@@ -64,15 +62,36 @@ class Translation_Trainer:
                 filename = f"{self.model_dir}/{timestamp}.pth.tar"
                 save_checkpoint(training_state, filename=filename)
 
+            # set training mode
+            self.model.train()
+            dataset.set_split(TRAIN)
+
+            # training loop
             for batch_gen in self.data_loader(dataset, batch_size=batch_size):
                 encoder_input, decoder_input = batch_gen[ENCODER_INPUT], batch_gen[DECODER_INPUT]
                 self.optimizer.zero_grad()
                 decoder_outputs = self.model(encoder_input, decoder_input)
                 loss = self.loss_func(decoder_outputs, decoder_input[:, 1:])
                 loss_batch = loss.item()
-                losses.append(loss_batch)
+                train_losses.append(loss_batch)
                 loss.backward()
                 self.optimizer.step()
 
-            avg_loss = sum(losses)/len(losses)
-            print(f'Completed Epoch {epoch} with average loss of {avg_loss:.2f}')
+            avg_loss = sum(train_losses)/len(train_losses)
+            print(f'Completed Epoch {epoch} with average training loss of {avg_loss:.2f}')
+
+            # set validation mode
+            self.model.eval()
+            dataset.set_split(VALID)
+
+            # validation loop
+            valid_losses = []
+            for batch_gen in self.data_loader(dataset, batch_size=batch_size):
+                encoder_input, decoder_input = batch_gen[ENCODER_INPUT], batch_gen[DECODER_INPUT]
+                self.optimizer.zero_grad()
+                decoder_outputs = self.model(encoder_input, decoder_input)
+                loss = self.loss_func(decoder_outputs, decoder_input[:, 1:])
+                loss_batch = loss.item()
+                valid_losses.append(loss_batch)
+            avg_loss = sum(valid_losses)/len(valid_losses)
+            print(f'Completed Epoch {epoch} with average validation loss of {avg_loss:.2f}')
