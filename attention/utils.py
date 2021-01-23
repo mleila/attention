@@ -2,6 +2,10 @@ import os
 import re
 import unicodedata
 
+import torch
+
+from attention.constants import ENGLISH
+
 
 def handle_dirs(dirpath):
     if not os.path.exists(dirpath):
@@ -24,3 +28,13 @@ def tokenize_english(sentence):
 
 def tokenize_french(sentence):
     return sentence.split(" ")
+
+def translate(sentence, model, vectorizer):
+    french_vocab = vectorizer.french_vocab
+    encoder_input = vectorizer.vectorize_sentence(sentence, language=ENGLISH).unsqueeze(0)
+    model.eval()
+    sos_token = french_vocab.lookup_token(french_vocab.sos)
+    prediction = model(encoder_input, sos_token=sos_token).squeeze(0)
+    word_indices = torch.argmax(prediction, dim=1)
+    words = [vectorizer.french_vocab.lookup_index(idx) for idx in word_indices]
+    return ' '.join(words)
