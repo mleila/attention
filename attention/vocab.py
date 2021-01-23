@@ -30,7 +30,7 @@ class Vocabulary:
             return self._token_to_index[token]
         return self._token_to_index[self.unk]
 
-    def lookup_indes(self, index):
+    def lookup_index(self, index):
         return self._tokens[index]
 
     def __len__(self):
