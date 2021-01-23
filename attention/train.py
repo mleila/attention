@@ -51,6 +51,9 @@ class Translation_Trainer:
                 checkpoint_state = torch.load(latest_checkpoint, map_location=map_location)
                 load_checkpoint(checkpoint_state, self.model)
 
+        # set training mode
+        self.model.train()
+
         for epoch in range(nb_epochs):
             losses = []
 
