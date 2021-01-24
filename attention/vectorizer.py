@@ -67,6 +67,21 @@ class Vectorizer:
         pass
 
 
+    def build_embedding_matrix_from_spacy(self, spacy, lang):
+        # select vocab
+        vocab = self.english_vocab if lang == ENGLISH else self.french_vocab
+
+        # populate matrix
+        matrix = []
+        for token in vocab:
+            spacy_token = spacy(token)
+            embedding = spacy_token.vector
+            if embedding.size == 0:
+                continue
+            matrix.append(embedding)
+        return torch.tensor(matrix)
+
+
     def build_embedding_matrix_from_fasttext(self, ft, lang, embedding_size=100):
         # set embedding size
         fasttext.util.reduce_model(ft, embedding_size)
