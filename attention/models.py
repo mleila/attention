@@ -8,7 +8,8 @@ class Encoder(nn.Module):
         self.hidden_size = hidden_size
 
         self.embedding = nn.Embedding.from_pretrained(embedding_matrix)
-        vocab_size, embedding_size = embedding_matrix.shape
+
+        _, embedding_size = embedding_matrix.shape
         self.gru = nn.GRU(embedding_size, hidden_size, batch_first=True)
 
     def forward(self, input, hidden):
