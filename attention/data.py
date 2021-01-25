@@ -65,7 +65,7 @@ class TranslationDataset(torch.utils.data.Dataset):
         vectorizer: Vectorizer,
         max_seq_length: int=SEQ_SIZE
         ):
-        self.df = df
+        self.df = df.reset_index(drop=True)
         self.vectorizer = vectorizer
         self.max_seq_length = max_seq_length
         self.set_split()
@@ -77,7 +77,7 @@ class TranslationDataset(torch.utils.data.Dataset):
 
     def set_split(self, split: str=TRAIN):
         assert split in [TRAIN, VALID, TEST], f'Split must be either {TRAIN}, {VALID}, or {TEST}'
-        self._target_df = self.df.query(f'split=="{split}"')
+        self._target_df = self.df.query(f'split=="{split}"').reset_index(drop=True)
 
     def __getitem__(self, index):
         row = self._target_df.iloc[index]
@@ -87,6 +87,7 @@ class TranslationDataset(torch.utils.data.Dataset):
 
         # skip sos token in encoder input
         english_sent_vec = english_sent_vec[1:]
+        french_sentence_vec = french_sentence_vec[:-1]
         return {
             ENCODER_INPUT: english_sent_vec,
             DECODER_INPUT: french_sentence_vec
@@ -99,7 +100,6 @@ class TranslationDataset(torch.utils.data.Dataset):
 def generate_batches(
     dataset,
     batch_size,
-    shuffle=True,
     device='cpu'
     ):
     """
@@ -109,7 +109,7 @@ def generate_batches(
     data_loader = torch.utils.data.DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=shuffle
+        shuffle=False
         )
 
     for data_dict in data_loader:
