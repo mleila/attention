@@ -21,8 +21,46 @@ def get_latest_model_checkpoint(model_dir):
     return checkpoints[-1]
 
 
+def train_simpleRNN_batch(
+    input_batch,
+    target_batch,
+    encoder,
+    decoder,
+    encoder_opt,
+    decoder_opt,
+    criterion,
+    device
+    ):
+    """
+    TODO: Implement teacher forcing
+    """
+    encoder_opt.zero_grad()
+    decoder_opt.zero_grad()
+
+    batch_size, seq_size = input_batch.shape
+    hidden = encoder.initHidden(batch_size=batch_size, device=device)
+
+    encoder_outputs = torch.zeros(seq_size, batch_size, encoder.hidden_size)
+    for i in range(seq_size):
+        tokens = input_batch[:, i]
+        output, hidden = encoder(tokens, hidden)
+        encoder_outputs[i] = output
+
+    for i in range(seq_size-1):
+        decoder_input = target_batch[:, i].unsqueeze(0)
+        output, hidden = decoder(decoder_input, hidden)
+        loss = criterion(output, target_batch[:, i+1])
+        loss.backward()
+        encoder_opt.step()
+        decoder_opt.step()
+        hidden = hidden.detach()
+
+    return loss
+
+
 class Translation_Trainer:
     """
+    # todo: adapt this for the encoder-decoder architecture
     This class is responsible for training models and all the associated bookkeeping
     """
 
