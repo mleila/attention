@@ -1,6 +1,9 @@
-from attention.constants import DECODER_INPUT, ENCODER_INPUT, TRAIN, VALID
 import time
+from random import random
 import torch
+
+from attention.constants import DECODER_INPUT, ENCODER_INPUT, TRAIN, VALID
+
 
 
 def save_checkpoint(state, filename):
@@ -29,7 +32,8 @@ def train_simpleRNN_batch(
     encoder_opt,
     decoder_opt,
     criterion,
-    device
+    device,
+    use_teacher_forcing=True
     ):
     """
     TODO: Implement teacher forcing
@@ -41,6 +45,8 @@ def train_simpleRNN_batch(
     hidden = encoder.initHidden(batch_size=batch_size, device=device)
 
     encoder_outputs = torch.zeros(seq_size, batch_size, encoder.hidden_size)
+    decoder_outputs = torch.zeros(seq_size, batch_size, decoder.output_size)
+
     for i in range(seq_size):
         tokens = input_batch[:, i]
         output, hidden = encoder(tokens, hidden)
@@ -48,7 +54,12 @@ def train_simpleRNN_batch(
 
     for i in range(seq_size-1):
         decoder_input = target_batch[:, i].unsqueeze(0)
-        output, hidden = decoder(decoder_input, hidden)
+        if use_teacher_forcing and random() <= 0.5 and i > 0:
+            prev_output = torch.argmax(decoder_outputs[i-1], dim=-1).unsqueeze(0)
+            output, hidden = decoder(prev_output, hidden)
+        else:
+            output, hidden = decoder(decoder_input, hidden)
+        decoder_outputs[i] = output
         loss = criterion(output, target_batch[:, i+1])
         loss.backward()
         encoder_opt.step()
