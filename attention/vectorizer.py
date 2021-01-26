@@ -1,5 +1,4 @@
 import torch
-import fasttext
 
 from attention.vocab import Vocabulary
 from attention.utils import normalize_string, tokenize_english, tokenize_french
@@ -67,14 +66,14 @@ class Vectorizer:
         pass
 
 
-    def build_embedding_matrix_from_spacy(self, spacy, lang):
+    def build_embedding_matrix_from_spacy(self, model, lang):
         # select vocab
         vocab = self.english_vocab if lang == ENGLISH else self.french_vocab
 
         # populate matrix
         matrix = []
         for token in vocab:
-            spacy_token = spacy(token)
+            spacy_token = model(token)
             embedding = spacy_token.vector
             if embedding.size == 0:
                 continue
@@ -82,17 +81,14 @@ class Vectorizer:
         return torch.tensor(matrix)
 
 
-    def build_embedding_matrix_from_fasttext(self, ft, lang, embedding_size=100):
-        # set embedding size
-        fasttext.util.reduce_model(ft, embedding_size)
-
+    def build_embedding_matrix_from_fasttext(self, model, lang):
         # select vocab
         vocab = self.english_vocab if lang == ENGLISH else self.french_vocab
 
         # populate matrix
         matrix = []
         for token in vocab:
-            embedding = ft.get_word_vector(token)
+            embedding = model.get_word_vector(token)
             matrix.append(embedding)
         return torch.tensor(matrix)
 
