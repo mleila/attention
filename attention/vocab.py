@@ -33,6 +33,22 @@ class Vocabulary:
     def lookup_index(self, index):
         return self._tokens[index]
 
+    @property
+    def sos_index(self):
+        return self.lookup_token(self.sos)
+
+    @property
+    def eos_index(self):
+        return self.lookup_token(self.eos)
+
+    @property
+    def unk_index(self):
+        return self.lookup_token(self.unk)
+
+    @property
+    def pad_index(self):
+        return self.lookup_token(self.pad)
+
     def __len__(self):
         return len(self._tokens)
 
