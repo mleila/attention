@@ -1,4 +1,6 @@
 """This module contains data management logic for NMT tasks. """
+from typing import Tuple
+
 import torch
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -104,6 +106,19 @@ def load_sentences_dataframe(file_path: str)-> pd.DataFrame:
     dataframe = pd.read_csv(file_path, sep='\t', header=None)
     dataframe.columns = ['english', 'french']
     return dataframe
+
+
+def filter_by_prefixes(
+    dataframe: pd.DataFrame,
+    prefixes: Tuple[str],
+    column: str
+    )-> pd.DataFrame:
+    """Filters a pandas dataframe by prefixes.
+    The function expects the text in the given column
+    to be preprocessed enough to match the prefixes
+    """
+    mask = dataframe[column].str.startswith(prefixes)
+    return dataframe[mask]
 
 
 def assign_rows_to_split(
