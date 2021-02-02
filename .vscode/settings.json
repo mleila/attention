@@ -4,6 +4,7 @@
     "python.pythonPath": "/Users/mohamedlaila/opt/miniconda3/envs/attention/bin/python",
     "python.linting.flake8Enabled": false,
     "files.exclude": {
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "**.egg-info": true
     }
 }
