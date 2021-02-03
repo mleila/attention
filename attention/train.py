@@ -1,3 +1,4 @@
+"""This moudle contains training logic."""
 import time
 from random import random
 import torch
@@ -116,11 +117,18 @@ class Translation_Trainer:
             dataset.set_split(TRAIN)
 
             # training loop
-            for batch_gen in self.data_loader(dataset, batch_size=batch_size):
-                encoder_input, decoder_input = batch_gen[ENCODER_INPUT], batch_gen[DECODER_INPUT]
+            for batch_gen in self.data_loader(dataset, batch_size=batch_size, device=self.device):
+                source_vector = batch_gen['source_vector']
+                source_length = batch_gen['source_length']
+                target_x_vector = batch_gen['target_x_vector']
+                target_y_vector = batch_gen['target_y_vector']
+
                 self.optimizer.zero_grad()
-                decoder_outputs = self.model(encoder_input, decoder_input)
-                loss = self.loss_func(decoder_outputs, decoder_input[:, 1:])
+                outputs = self.model(source_vector, source_length, target_x_vector)
+                outputs = outputs.permute(1, 0, 2)
+
+                pad_index = dataset.vectorizer.target_vocab.pad_index
+                loss = self.loss_func(outputs, target_y_vector, pad_index)
                 loss_batch = loss.item()
                 train_losses.append(loss_batch)
                 loss.backward()
@@ -132,15 +140,21 @@ class Translation_Trainer:
             # set validation mode
             self.model.eval()
             dataset.set_split(VALID)
-            french_vocab = dataset.vectorizer.french_vocab
-            sos_token = french_vocab.lookup_token(french_vocab.sos)
 
             # validation loop
             valid_losses = []
-            for batch_gen in self.data_loader(dataset, batch_size=batch_size):
-                encoder_input, decoder_input = batch_gen[ENCODER_INPUT], batch_gen[DECODER_INPUT]
-                decoder_outputs = self.model(encoder_input, sos_token=sos_token)
-                loss = self.loss_func(decoder_outputs, decoder_input[:, 1:])
+            for batch_gen in self.data_loader(dataset, batch_size=batch_size, device=self.device):
+                source_vector = batch_gen['source_vector']
+                source_length = batch_gen['source_length']
+                target_x_vector = batch_gen['target_x_vector']
+                target_y_vector = batch_gen['target_y_vector']
+
+                outputs = self.model(source_vector, source_length, target_x_vector)
+                outputs = outputs.permute(1, 0, 2)
+
+                pad_index = dataset.vectorizer.target_vocab.pad_index
+                loss = self.loss_func(outputs, target_y_vector, pad_index)
+
                 loss_batch = loss.item()
                 valid_losses.append(loss_batch)
             avg_loss = sum(valid_losses)/len(valid_losses)
