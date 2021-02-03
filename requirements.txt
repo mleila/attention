@@ -1,0 +1,14 @@
+certifi==2020.12.5
+cffi @ file:///opt/concourse/worker/volumes/live/730e9a28-66f9-4e03-51ad-252ec8e40d81/volume/cffi_1606255126408/work
+fasttext==0.9.2
+mkl-fft==1.2.0
+mkl-random==1.1.1
+mkl-service==2.3.0
+numpy @ file:///opt/concourse/worker/volumes/live/5572694e-967a-4c0c-52cf-b53d43e72de9/volume/numpy_and_numpy_base_1603491881791/work
+pandas==1.2.1
+pybind11==2.6.1
+pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+python-dateutil==2.8.1
+pytz @ file:///tmp/build/80754af9/pytz_1608922264688/work
+six @ file:///opt/concourse/worker/volumes/live/5b31cb27-1e37-4ca5-6e9f-86246eb206d2/volume/six_1605205320872/work
+torch @ file:///opt/concourse/worker/volumes/live/f1ad46c0-b0e0-4a2c-42b1-36c80dc13116/volume/pytorch_1596288435440/work
