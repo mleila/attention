@@ -226,9 +226,12 @@ class NMTDecoder(nn.Module):
 
     def _eval_forward(self,
                       encoder_state: torch.Tensor,
-                      initial_hidden_state: torch.Tensor
+                      initial_hidden_state: torch.Tensor,
+                      target_sequence: torch.Tensor
                      ):
-        batch_size, seq_size = encoder_state.size(0), encoder_state.size(1)
+        batch_size = encoder_state.size(0)
+        seq_size = target_sequence.size(1)
+
         output_sequence = torch.zeros(seq_size, batch_size, self._num_embeddings, dtype=torch.int64)
         output_sequence[0, :, :] = self.sos_index
 
@@ -283,7 +286,7 @@ class NMTDecoder(nn.Module):
     def forward(self, encoder_state, initial_hidden_state, target_sequence):
         if self.training:
             return self._train_forward(encoder_state, initial_hidden_state, target_sequence)
-        return self._eval_forward(encoder_state, initial_hidden_state)
+        return self._eval_forward(encoder_state, initial_hidden_state, target_sequence)
 
 
 class AttentionModel(nn.Module):
